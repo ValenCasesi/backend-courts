@@ -2,7 +2,6 @@
 
 import { Router } from 'express'
 import * as userCtrl from '../controllers/user.controller'
-import { ensureAuthenticated } from '../middlewares/auth.middleware'
 
 const router = Router()
 
@@ -91,7 +90,7 @@ router.post('/', userCtrl.createUser)
  *                   items:
  *                     $ref: '#/components/schemas/User'
  */
-router.get('/', ensureAuthenticated, userCtrl.listUsers)
+router.get('/', userCtrl.listUsers)
 
 /**
  * @openapi
@@ -124,7 +123,7 @@ router.get('/', ensureAuthenticated, userCtrl.listUsers)
  *       404:
  *         description: Usuario no encontrado
  */
-router.get('/:id', ensureAuthenticated, userCtrl.getUser)
+router.get('/:id', userCtrl.getUser)
 
 /**
  * @openapi
@@ -174,7 +173,7 @@ router.get('/:id', ensureAuthenticated, userCtrl.getUser)
  *       404:
  *         description: Usuario no encontrado
  */
-router.put('/:id', ensureAuthenticated, userCtrl.updateUser)
+router.put('/:id', userCtrl.updateUser)
 
 /**
  * @openapi
@@ -205,6 +204,6 @@ router.put('/:id', ensureAuthenticated, userCtrl.updateUser)
  *       404:
  *         description: Usuario no encontrado
  */
-router.delete('/:id', ensureAuthenticated, userCtrl.deleteUser)
-
+router.delete('/:id', userCtrl.deleteUser)
+// ensureAuthenticated, 
 export default router
