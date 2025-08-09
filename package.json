@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --runInBand --detectOpenHandles",
-    "dev": "ts-node-dev --respawn src/server.ts"
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "postbuild": "npx prisma generate",
+    "vercel-build": "npm run build",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +27,7 @@
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "jest": "^30.0.5",
+    "rimraf": "^6.0.1",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.0",
     "ts-node-dev": "^2.0.0",

@@ -2,7 +2,7 @@
 
 import request from 'supertest';
 import app from '../app';
-import { prisma } from '../models/prismaClient';
+import prisma from '../models/prismaClient';
 
 const TEST_USER = {
     email: 'test@example.com',

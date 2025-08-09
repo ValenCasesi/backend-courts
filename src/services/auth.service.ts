@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { prisma } from '../models/prismaClient';
+import prisma from '../models/prismaClient';
 import { signToken } from '../utils/jwt';
 
 export interface LoginDTO {

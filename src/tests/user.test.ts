@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../app';
-import { prisma } from '../models/prismaClient';
+import prisma from '../models/prismaClient';
 
 beforeAll(async () => {
     // Asegura tablas limpias

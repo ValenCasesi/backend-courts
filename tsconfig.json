@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
-    "rootDir": "src",
+    "module": "CommonJS",
     "outDir": "dist",
+    "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+    // y tus otras opciones actuales...
   },
   "include": [
-    "src",
-    "setupTests.js"
+    "src/**/*"
   ]
 }

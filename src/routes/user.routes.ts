@@ -1,8 +1,33 @@
-import { Router } from 'express';
-import * as userCtrl from '../controllers/user.controller';
-import { ensureAuthenticated } from '../middlewares/auth.middleware';
+// src/routes/user.routes.ts
 
-const router = Router();
+import { Router } from 'express'
+import * as userCtrl from '../controllers/user.controller'
+import { ensureAuthenticated } from '../middlewares/auth.middleware'
+
+const router = Router()
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         email:
+ *           type: string
+ *         name:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
 
 /**
  * @openapi
@@ -17,7 +42,7 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, password, name]
+ *             required: [email, password]
  *             properties:
  *               email:
  *                 type: string
@@ -25,15 +50,22 @@ const router = Router();
  *                 type: string
  *               name:
  *                 type: string
+ *               lastName:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  */
-router.post('/', userCtrl.createUser);
+router.post('/', userCtrl.createUser)
 
 /**
  * @openapi
@@ -50,11 +82,16 @@ router.post('/', userCtrl.createUser);
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
  */
-router.get('/', ensureAuthenticated, userCtrl.listUsers);
+router.get('/', ensureAuthenticated, userCtrl.listUsers)
 
 /**
  * @openapi
@@ -71,17 +108,23 @@ router.get('/', ensureAuthenticated, userCtrl.listUsers);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID del usuario
  *     responses:
  *       200:
  *         description: Usuario encontrado
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  *       404:
  *         description: Usuario no encontrado
  */
-router.get('/:id', ensureAuthenticated, userCtrl.getUser);
+router.get('/:id', ensureAuthenticated, userCtrl.getUser)
 
 /**
  * @openapi
@@ -98,6 +141,7 @@ router.get('/:id', ensureAuthenticated, userCtrl.getUser);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID del usuario
  *     requestBody:
  *       required: true
  *       content:
@@ -107,21 +151,30 @@ router.get('/:id', ensureAuthenticated, userCtrl.getUser);
  *             properties:
  *               email:
  *                 type: string
+ *               password:
+ *                 type: string
  *               name:
  *                 type: string
- *               password:
+ *               lastName:
  *                 type: string
  *     responses:
  *       200:
- *         description: Usuario actualizado
+ *         description: Usuario actualizado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Petición inválida
  *       404:
  *         description: Usuario no encontrado
  */
-router.put('/:id', ensureAuthenticated, userCtrl.updateUser);
+router.put('/:id', ensureAuthenticated, userCtrl.updateUser)
 
 /**
  * @openapi
@@ -138,12 +191,20 @@ router.put('/:id', ensureAuthenticated, userCtrl.updateUser);
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID del usuario
  *     responses:
- *       204:
+ *       200:
  *         description: Usuario eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       404:
  *         description: Usuario no encontrado
  */
-router.delete('/:id', ensureAuthenticated, userCtrl.deleteUser);
+router.delete('/:id', ensureAuthenticated, userCtrl.deleteUser)
 
-export default router;
+export default router

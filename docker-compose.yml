@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: padel-db
+    restart: always
+    environment:
+      POSTGRES_USER: padeluser
+      POSTGRES_PASSWORD: padelpass
+      POSTGRES_DB: padeldb
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: padel-api
+    restart: always
+    ports:
+      - '4000:4000'
+    env_file: .env
+    depends_on:
+      - db
+    # Ahora solo arranca el servidor (todo lo demás ya se hizo en build)
+    command: node dist/app.js
+
+volumes:
+  db_data:

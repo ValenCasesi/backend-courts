@@ -1,50 +1,41 @@
-import { PrismaClient, User } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import { PrismaClient, User } from '@prisma/client'
+import bcrypt from 'bcrypt'
+import { CreateUserDTO, UpdateUserDTO } from '../dtos/user.dto'
 
-const prisma = new PrismaClient();
-const SALT_ROUNDS = 10;
+const prisma = new PrismaClient()
+const SALT_ROUNDS = 10
 
-export interface CreateUserDTO {
-    email: string;
-    password: string;
-    name?: string;
-}
-
-export const createUser = async (data: CreateUserDTO): Promise<User> => {
-    const hashed = await bcrypt.hash(data.password, SALT_ROUNDS);
+export async function createUser(data: CreateUserDTO): Promise<User> {
+    const hash = await bcrypt.hash(data.password, SALT_ROUNDS)
     return prisma.user.create({
         data: {
             email: data.email,
-            password: hashed,
+            password: hash,
             name: data.name,
+            lastName: data.lastName,
         },
-    });
-};
+    })
+}
 
-export const getAllUsers = async (): Promise<User[]> => {
-    return prisma.user.findMany();
-};
+export async function getAllUsers(): Promise<User[]> {
+    return prisma.user.findMany()
+}
 
-export const getUserById = async (id: number): Promise<User | null> => {
-    return prisma.user.findUnique({ where: { id } });
-};
+export async function getUserById(id: number): Promise<User | null> {
+    return prisma.user.findUnique({ where: { id } })
+}
 
-export const updateUser = async (
-    id: number,
-    data: Partial<CreateUserDTO>
-): Promise<User> => {
-    const updateData: Partial<CreateUserDTO> = { ...data };
-
+export async function updateUser(id: number, data: UpdateUserDTO): Promise<User> {
+    const updateData: any = { ...data }
     if (data.password) {
-        updateData.password = await bcrypt.hash(data.password, SALT_ROUNDS);
+        updateData.password = await bcrypt.hash(data.password, SALT_ROUNDS)
     }
-
     return prisma.user.update({
         where: { id },
         data: updateData,
-    });
-};
+    })
+}
 
-export const deleteUser = async (id: number): Promise<User> => {
-    return prisma.user.delete({ where: { id } });
-};
+export async function deleteUser(id: number): Promise<void> {
+    await prisma.user.delete({ where: { id } })
+}
