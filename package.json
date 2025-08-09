@@ -4,13 +4,9 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "prebuild": "npm run clean",
-    "build": "tsc",
-    "postbuild": "npx prisma generate",
-    "vercel-build": "npm run build",
     "dev": "ts-node-dev --respawn src/server.ts",
-    "start": "node dist/server.js",
-    "test": "jest --runInBand --detectOpenHandles"
+    "build": "tsc",
+    "vercel-build": "npx prisma generate && npx prisma migrate deploy && npm run clean && tsc"
   },
   "keywords": [],
   "author": "",
