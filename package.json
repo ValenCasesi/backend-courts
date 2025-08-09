@@ -6,7 +6,7 @@
     "clean": "rimraf dist",
     "dev": "ts-node-dev --respawn src/server.ts",
     "build": "tsc",
-    "vercel-build": "npx prisma generate && npx prisma migrate deploy && npm run clean && tsc"
+    "vercel-build": "npx prisma generate && npm run clean && tsc"
   },
   "keywords": [],
   "author": "",
