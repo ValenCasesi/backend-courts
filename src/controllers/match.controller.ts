@@ -85,6 +85,45 @@ import * as matchService from '../services/match.service';
  *           description: Puntos que se restan a los perdedores (positivo)
  *           example: 25
  */
+
+/**
+ * Helper: mapea un match (Prisma result) para respuesta JSON.
+ * Garantiza que cada participant tenga un `user` con datos (usa snapshot si user es null).
+ */
+function mapMatchForResponse(match: any) {
+    const mappedParticipants = (match.participants ?? []).map((p: any) => {
+        const user = p.user
+            ? {
+                id: p.user.id ?? null,
+                name: p.user.name ?? null,
+                lastName: p.user.lastName ?? null,
+                email: p.user.email ?? null,
+            }
+            : {
+                id: p.userId ?? null,
+                name: p.userName ?? null,
+                lastName: p.userLastName ?? null,
+                email: p.userEmail ?? null,
+            };
+
+        return {
+            id: p.id,
+            isWinner: p.isWinner,
+            points: p.points,
+            user,
+        };
+    });
+
+    return {
+        id: match.id,
+        date: match.date,
+        pointsForWinners: match.pointsForWinners,
+        pointsForLosers: match.pointsForLosers,
+        createdAt: match.createdAt,
+        participants: mappedParticipants,
+    };
+}
+
 /**
  * @openapi
  * /api/matches:
@@ -118,42 +157,23 @@ import * as matchService from '../services/match.service';
  *                   type: string
  *                 match:
  *                   $ref: '#/components/schemas/Match'
- *       400:
- *         description: Payload inválido o reglas de negocio violadas
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       401:
- *         description: No autorizado (JWT inválido o ausente)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
  */
 export const createMatch = async (req: Request<{}, {}, CreateMatchDTO>, res: Response, next: NextFunction) => {
     try {
         const body = req.body;
 
-        // Validaciones mínimas en controller (para respuestas HTTP coherentes)
         if (!body || !body.date || !body.players || !body.winners) {
             return res.status(400).json({ message: 'Invalid payload' });
         }
 
-        // coerciones simples
         body.pointsForWinners = Number(body.pointsForWinners ?? 0);
         body.pointsForLosers = Number(body.pointsForLosers ?? 0);
 
         const match = await matchService.createMatch(body);
-        return res.status(201).json({ message: 'Match created', match });
+
+        const mapped = mapMatchForResponse(match);
+        return res.status(201).json({ message: 'Match created', match: mapped });
     } catch (err: any) {
-        // errores de validación desde service -> 400
         if (err.message && /must|required|distinct|exist/i.test(err.message)) {
             return res.status(400).json({ message: err.message });
         }
@@ -197,26 +217,19 @@ export const createMatch = async (req: Request<{}, {}, CreateMatchDTO>, res: Res
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Match'
- *       401:
- *         description: No autorizado (JWT inválido o ausente)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
  */
 export const listMatches = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const limit = Number(req.query.limit ?? 50);
         const offset = Number(req.query.offset ?? 0);
         const matches = await matchService.listMatches(limit, offset);
-        res.json({ message: 'Matches retrieved', matches });
+        const mapped = matches.map((m: any) => mapMatchForResponse(m));
+        res.json({ message: 'Matches retrieved', matches: mapped });
     } catch (err) {
         next(err);
     }
 };
+
 /**
  * @openapi
  * /api/matches/{id}:
@@ -245,33 +258,6 @@ export const listMatches = async (req: Request, res: Response, next: NextFunctio
  *                   type: string
  *                 match:
  *                   $ref: '#/components/schemas/Match'
- *       400:
- *         description: ID inválido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       404:
- *         description: Partido no encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       401:
- *         description: No autorizado (JWT inválido o ausente)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
  */
 export const getMatch = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
@@ -279,11 +265,14 @@ export const getMatch = async (req: Request<{ id: string }>, res: Response, next
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
         const match = await matchService.getMatchById(id);
         if (!match) return res.status(404).json({ message: 'Match not found' });
-        res.json({ message: 'Match retrieved', match });
+
+        const mapped = mapMatchForResponse(match);
+        res.json({ message: 'Match retrieved', match: mapped });
     } catch (err) {
         next(err);
     }
 };
+
 /**
  * @openapi
  * /api/matches/{id}:
@@ -313,35 +302,6 @@ export const getMatch = async (req: Request<{ id: string }>, res: Response, next
  *                   example: Match deleted
  *                 match:
  *                   $ref: '#/components/schemas/Match'
- *       400:
- *         description: ID inválido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Invalid id
- *       404:
- *         description: Partido no encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Match not found
- *       401:
- *         description: No autorizado (JWT inválido o ausente)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
  */
 export const deleteMatch = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
@@ -349,7 +309,8 @@ export const deleteMatch = async (req: Request<{ id: string }>, res: Response, n
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
 
         const deleted = await matchService.deleteMatch(id);
-        return res.json({ message: 'Match deleted', match: deleted });
+        const mapped = mapMatchForResponse(deleted);
+        return res.json({ message: 'Match deleted', match: mapped });
     } catch (err: any) {
         if (err.message === 'Match not found') return res.status(404).json({ message: err.message });
         next(err);
